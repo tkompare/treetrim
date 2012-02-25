@@ -53,7 +53,7 @@
 		$(document).ready(function() {
 			CenterLatLng=new google.maps.LatLng('41.78456','-87.59293');
 			var myOptions = {
-				zoom: 15,
+				zoom: 10,
 				mapTypeControl: false,
 				streetViewControl: false,
 				panControl: false,
@@ -67,6 +67,7 @@
 			var putMap = document.getElementById('theMap');
 			var theMap = new google.maps.Map(putMap, myOptions);
 			theMap.setCenter(CenterLatLng);
+			/*
 			requestsAll = new google.maps.FusionTablesLayer({
 				query: {	
 					select: 'location',
@@ -82,6 +83,7 @@
 				}
 			});
 			requestsCompleted.setMap(null);
+			*/
 			var requestsPending = new google.maps.FusionTablesLayer({
 				query: {
 					select: 'location',
@@ -90,6 +92,7 @@
 				}
 			});
 			requestsPending.setMap(theMap);
+			/*
 			$("#requests-all").click(function() {
 				if (requestsCompleted.getMap() != null) { requestsCompleted.setMap(null); }
 				if (requestsPending.getMap() != null) { requestsPending.setMap(null); }
@@ -104,7 +107,8 @@
 				if (requestsAll.getMap != null) { requestsAll.setMap(null); }
 				if (requestsCompleted.getMap != null) { requestsCompleted.setMap(null); }
 				requestsPending.setMap(theMap);
-			});
+			})
+			*/;
 		});
 	</script>
 </body>
