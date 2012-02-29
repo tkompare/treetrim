@@ -12,8 +12,8 @@
 	<link href="css/bootstrap.css" rel="stylesheet">
 	<style type="text/css">
 		body {
-			padding-top: 30px;
-			padding-bottom: 30px;
+			padding-top: 20px;
+			padding-bottom: 20px;
 		}
 	</style>
 	<link href="css/bootstrap-responsive.css" rel="stylesheet">
@@ -25,11 +25,15 @@
 			<div class="span12">
 				<div class="row-fluid">
 					<div class="span4">
-						<h2>Chicago Tree Trimming</h2>
+						<h2>Chicago Tree Trimming <sup>&beta;</sup></h2>
 						<p><a href="http://twitter.com/tomkompare"><em>Tom Kompare</em></a><br />
 						Data Source: <a href="https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Tree-Trims/uxic-zsuj">data.cityofchicago.org</a></p>
 						<p>All open and completed tree trim requests made to 311 since January 1, 2011.* The Department of Streets and Sanitation maintains all trees growing in the public way.</p>
 						<form>
+						<div class="well">
+						<label for="wards" class="checkbox">
+							<input type="checkbox" id="wards" name="wards"> Show Ward Boundaries</label>
+						</div>
 						<div class="well">
 							<label for="year-creation">Year Requested</label>
 							<select id="year-creation" name="year-creation">
@@ -52,11 +56,11 @@
 							<div class="input-append">
 								<input class="span2" id="address" name="address" type="text" placeholder="1 N State St" value="" /><span class="add-on">Chicago, IL</span><span id="help-address" rel="tooltip" title="Within 1/2 mile">&nbsp;&nbsp;?</span>
 							</div>
-							<button id="map-refresh" type="button" class="btn btn-primary"><i class="icon-refresh icon-white"></i>Run Query</button>
+							<button id="map-refresh" type="button" class="btn btn-primary"><i class="icon-refresh icon-white"></i>&nbsp;Run Query</button>
 							</div>
 							<div id="yearWarn"></div>
 							<div id="numResults">&nbsp;</div>
-							<button id="map-all" type="button" class="btn btn-danger"><i class="icon-map-marker icon-white"></i>Show All</button>
+							<button id="map-all" type="button" class="btn btn-danger"><i class="icon-map-marker icon-white"></i>&nbsp;Show All</button>
 						</form>
 						<p><em>* data last updated: February 24, 2012</em></p>
 					</div>
