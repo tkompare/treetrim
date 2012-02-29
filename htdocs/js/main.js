@@ -11,6 +11,7 @@ $(document).ready(function() {
 		var insertAnd = '';
 		var geocoder = new google.maps.Geocoder();
 		var searchRadius = '805';
+		var addrMarker = false;
 		var myOptions = {
 			zoom : 11,
 			mapTypeControl : true,
@@ -77,6 +78,10 @@ $(document).ready(function() {
 					{
 						if (status == google.maps.GeocoderStatus.OK)
 						{
+							if(addrMarker != false)
+							{
+								addrMarker.setMap(null);
+						  }
 							theMap.setCenter(results[0].geometry.location);
 							theMap.setZoom(14);
 							addrMarker = new google.maps.Marker({
@@ -106,6 +111,10 @@ $(document).ready(function() {
 		});
 		$("#map-all").click(function() {
 			setQueryString();
+			if(addrMarker != false)
+			{
+				addrMarker.setMap(null);
+		  }
 			resetMap(queryString);
 			$("#year-creation").val('none');
 			$("#year-completed").val('none');
