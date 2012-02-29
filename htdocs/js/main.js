@@ -8,7 +8,7 @@ $(document).ready(function() {
 		var queryString = null;
 		var myOptions = {
 			zoom : 11,
-			mapTypeControl : false,
+			mapTypeControl : true,
 			streetViewControl : false,
 			panControl : false,
 			zoomControl : true,
@@ -16,7 +16,7 @@ $(document).ready(function() {
 				style : google.maps.ZoomControlStyle.SMALL,
 				position : google.maps.ControlPosition.LEFT_TOP
 			},
-			mapTypeId : google.maps.MapTypeId.ROADMAP
+			mapTypeId : google.maps.MapTypeId.HYBRID
 		};
 		var mapDOM = document.getElementById('theMap');
 		// Make the base map
@@ -36,38 +36,60 @@ $(document).ready(function() {
 		$("#requests-all").click(
 				function() {
 					setQueryString();
-					fusionLayer.setMap(null);
-					fusionLayer = new google.maps.FusionTablesLayer(
-							fusionTableId, {
-								query : queryString
-							});
-					fusionLayer.setMap(theMap);
-					displayCount(queryString);
+					resetMap(queryString);
+					$('[name="year-creation"]').val('none');
+					$('[name="year-completed"]').val('none');
 				});
 		$("#requests-completed").click(
 				function() {
 					setQueryString();
 					queryString = queryString + " WHERE Status LIKE '%Completed%'";
-					fusionLayer.setMap(null);
-					fusionLayer = new google.maps.FusionTablesLayer(
-							fusionTableId, {
-								query : queryString
-							});
-					fusionLayer.setMap(theMap);
-					displayCount(queryString);
+					resetMap(queryString);
+					$('[name="year-creation"]').val('none');
+					$('[name="year-completed"]').val('none');
 				});
 		$("#requests-pending").click(
 				function() {
 					setQueryString();
 					queryString = queryString + " WHERE Status LIKE '%Open%'";
-					fusionLayer.setMap(null);
-					fusionLayer = new google.maps.FusionTablesLayer(
-							fusionTableId, {
-								query : queryString
-							});
-					fusionLayer.setMap(theMap);
-					displayCount(queryString);
+					resetMap(queryString);
+					$('[name="year-creation"]').val('none');
+					$('[name="year-completed"]').val('none');
 				});
+		$("#map-refresh").click(
+				function() {
+					yearCreation = $("#year-creation").val();
+					yearCompleted = $("#year-completed").val();
+					if (yearCreation != 'none' || yearCompleted != 'none')
+					{
+						setQueryString();
+						queryString = queryString + " WHERE CreationDate >= '01/01/" + yearCreation + "' AND CreationDate <= '12/31/"+yearCreation+"'";
+						if (yearCompleted != 'open')
+						{
+							queryString = queryString + "AND CompletionDate >= '01/01/" + yearCompleted + "' AND CompletionDate <= '12/31/"+yearCompleted+"'";
+						}
+						else
+						{
+							queryString = queryString + "AND Status LIKE '%Open%'";
+						}
+						resetMap(queryString);
+						$('[name="requests"]').attr('checked', false);
+					}
+					else
+					{
+						$("#yearWarn").html('<div class="alert alert-error alert-block"><a class="close" data-dismiss="alert">x</a>Choose both a Request and Completion year.</div>');
+					}
+				});
+		function resetMap(queryString)
+		{
+			fusionLayer.setMap(null);
+			fusionLayer = new google.maps.FusionTablesLayer(
+					fusionTableId, {
+						query : queryString
+					});
+			fusionLayer.setMap(theMap);
+			displayCount(queryString);
+		}
 		// Ward Layer Listeners
 		var wardLayer = new google.maps.FusionTablesLayer(3057562, {
 			query : "SELECT geometry FROM 3057562"
@@ -90,7 +112,7 @@ $(document).ready(function() {
 		}
 		function displayCount(queryString) {
 			$("#numResults").fadeOut(function() {
-				$("#numResults").html("Calculating count...");
+				$("#numResults").html('<div class="alert"><strong>Calculating...</strong></div>');
 			});
 			$("#numResults").fadeIn();
 			queryString = queryString.replace("SELECT " + geoColumn,
@@ -116,7 +138,7 @@ $(document).ready(function() {
 				numRows = parseInt(response.getDataTable().getValue(0, 0));
 			}
 			$("#numResults").fadeOut(function() {
-				$("#numResults").html('<strong>' + addCommas(numRows) + '</strong> requests');
+				$("#numResults").html('<div class="alert alert-success"><strong>' + addCommas(numRows) + '</strong> Requests</div>');
 			});
 			$("#numResults").fadeIn();
 		}
