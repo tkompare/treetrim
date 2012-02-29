@@ -1,11 +1,16 @@
 google.load('visualization', '1', {});
 $(document).ready(function() {
+		//Popover
+		$('#help-address').tooltip();
 		// Set up various variables
 		var CenterLatLng = new google.maps.LatLng('41.845', '-87.669');
 		var fusionTableId = '3028961';
 		var geoColumn = 'Location';
 		var fusionLayer = null;
 		var queryString = null;
+		var insertAnd = '';
+		var geocoder = new google.maps.Geocoder();
+		var searchRadius = '805';
 		var myOptions = {
 			zoom : 11,
 			mapTypeControl : true,
@@ -16,7 +21,7 @@ $(document).ready(function() {
 				style : google.maps.ZoomControlStyle.SMALL,
 				position : google.maps.ControlPosition.LEFT_TOP
 			},
-			mapTypeId : google.maps.MapTypeId.HYBRID
+			mapTypeId : google.maps.MapTypeId.ROADMAP
 		};
 		var mapDOM = document.getElementById('theMap');
 		// Make the base map
@@ -33,53 +38,79 @@ $(document).ready(function() {
 		fusionLayer.setMap(theMap);
 		displayCount(queryString);
 		// Tree Trim Data Listeners
-		$("#requests-all").click(
-				function() {
-					setQueryString();
-					resetMap(queryString);
-					$('[name="year-creation"]').val('none');
-					$('[name="year-completed"]').val('none');
-				});
-		$("#requests-completed").click(
-				function() {
-					setQueryString();
-					queryString = queryString + " WHERE Status LIKE '%Completed%'";
-					resetMap(queryString);
-					$('[name="year-creation"]').val('none');
-					$('[name="year-completed"]').val('none');
-				});
-		$("#requests-pending").click(
-				function() {
-					setQueryString();
-					queryString = queryString + " WHERE Status LIKE '%Open%'";
-					resetMap(queryString);
-					$('[name="year-creation"]').val('none');
-					$('[name="year-completed"]').val('none');
-				});
-		$("#map-refresh").click(
-				function() {
-					yearCreation = $("#year-creation").val();
-					yearCompleted = $("#year-completed").val();
-					if (yearCreation != 'none' || yearCompleted != 'none')
+		$("#map-refresh").click(function() {
+			yearCreation = $("#year-creation").val();
+			yearCompleted = $("#year-completed").val();
+			address = $("#address").val();
+			if (yearCreation != 'none' || yearCompleted != 'none')
+			{
+				setQueryString();
+				if (yearCreation != 'all' || yearCompleted != 'all')
+				{
+					queryString = queryString + " WHERE";
+				if (yearCreation != 'all')
 					{
-						setQueryString();
-						queryString = queryString + " WHERE CreationDate >= '01/01/" + yearCreation + "' AND CreationDate <= '12/31/"+yearCreation+"'";
-						if (yearCompleted != 'open')
+						queryString = queryString + " CreationDate >= '01/01/" + yearCreation + "' AND CreationDate <= '12/31/"+yearCreation+"'";
+						insertAnd = ' AND';
+				}
+					if (yearCompleted != 'open' && yearCompleted != 'all')
+					{
+						queryString = queryString + insertAnd + " CompletionDate >= '01/01/" + yearCompleted + "' AND CompletionDate <= '12/31/"+yearCompleted+"'";
+					}
+					if (yearCompleted == 'open')
+					{
+						queryString = queryString + insertAnd + " Status LIKE '%Open%'";
+					}
+					if (yearCompleted == 'all')
+					{
+						queryString = queryString + insertAnd + " Status LIKE '%Completed%'";
+					}
+				}
+				else
+				{
+					queryString = queryString + " WHERE Status LIKE '%Completed%'";
+				}
+				if (address != '')
+				{
+					address += ' Chicago IL';
+					geocoder.geocode({'address': address}, function(results, status)
+					{
+						if (status == google.maps.GeocoderStatus.OK)
 						{
-							queryString = queryString + "AND CompletionDate >= '01/01/" + yearCompleted + "' AND CompletionDate <= '12/31/"+yearCompleted+"'";
+							theMap.setCenter(results[0].geometry.location);
+							theMap.setZoom(14);
+							addrMarker = new google.maps.Marker({
+								position: results[0].geometry.location,
+								map: theMap,
+								animation: google.maps.Animation.DROP,
+								title:address
+							});
+							queryString = queryString + " AND ST_INTERSECTS(" + geoColumn + ", CIRCLE(LATLNG" + results[0].geometry.location.toString() + "," + searchRadius + "))";
+							resetMap(queryString);
 						}
 						else
 						{
-							queryString = queryString + "AND Status LIKE '%Open%'";
+							alert("We could not locate your address: " + status);
 						}
-						resetMap(queryString);
-						$('[name="requests"]').attr('checked', false);
-					}
-					else
-					{
-						$("#yearWarn").html('<div class="alert alert-error alert-block"><a class="close" data-dismiss="alert">x</a>Choose both a Request and Completion year.</div>');
-					}
-				});
+					});
+				}
+				else
+				{
+					resetMap(queryString);
+				}
+			}
+			else
+			{
+				$("#yearWarn").html('<div class="alert alert-error alert-block"><a class="close" data-dismiss="alert">x</a>Choose both a Request and Completion year.</div>');
+			}
+		});
+		$("#map-all").click(function() {
+			setQueryString();
+			resetMap(queryString);
+			$("#year-creation").val('none');
+			$("#year-completed").val('none');
+			$("#address").val('');
+		});
 		function resetMap(queryString)
 		{
 			fusionLayer.setMap(null);
@@ -138,7 +169,7 @@ $(document).ready(function() {
 				numRows = parseInt(response.getDataTable().getValue(0, 0));
 			}
 			$("#numResults").fadeOut(function() {
-				$("#numResults").html('<div class="alert alert-success"><strong>' + addCommas(numRows) + '</strong> Requests</div>');
+				$("#numResults").html('<div class="alert alert-success"><strong>' + addCommas(numRows) + '</strong> Requests Selected</div>');
 			});
 			$("#numResults").fadeIn();
 		}

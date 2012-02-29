@@ -28,26 +28,13 @@
 						<h2>Chicago Tree Trimming</h2>
 						<p><a href="http://twitter.com/tomkompare"><em>Tom Kompare</em></a><br />
 						Data Source: <a href="https://data.cityofchicago.org/Service-Requests/311-Service-Requests-Tree-Trims/uxic-zsuj">data.cityofchicago.org</a></p>
-						<div id="numResults">&nbsp;</div>
+						<p>All open and completed tree trim requests made to 311 since January 1, 2011.* The Department of Streets and Sanitation maintains all trees growing in the public way.</p>
 						<form>
-						<div class="well">
-						<label for="requests-all" class="radio">
-							<input type="radio" id="requests-all" name="requests" checked="checked"> <strong>All Requests</strong>
-						</label>
-						<label for="requests-completed" class="radio">
-							<input type="radio" id="requests-completed" name="requests"> <strong>All Completed Requests</strong>
-						</label>
-						<label for="requests-pending" class="radio">
-							<input type="radio" id="requests-pending" name="requests"> <strong>All Open Requests</strong>
-						</label>
-						<label for="wards" class="checkbox">
-							<input type="checkbox" id="wards" name="wards"> <strong>Wards</strong>
-						</label>
-						</div>
 						<div class="well">
 							<label for="year-creation">Year Requested</label>
 							<select id="year-creation" name="year-creation">
-								<option value="none">choose</option>
+								<option value="none">-choose-</option>
+								<option value="all">All</option>
 								<option value="09">2009</option>
 								<option value="10">2010</option>
 								<option value="11">2011</option>
@@ -55,16 +42,23 @@
 							</select>
 							<label for="year-completed">Year Completed</label>
 							<select id="year-completed" name="year-completed">
-								<option value="none">choose</option>
-								<option value="10">2010</option>
+								<option value="none">-choose-</option>
+								<option value="all">All</option>
 								<option value="11">2011</option>
 								<option value="12">2012</option>
 								<option value="open">Not Completed</option>
 							</select>
-							<button id="map-refresh" type="button" class="btn btn-primary"><i class="icon-refresh icon-white"></i>Refresh Map</button>
-						</div>
-						<div><span id="yearWarn"></span></div>
+							<label for="address">Street (optional)</label>
+							<div class="input-append">
+								<input class="span2" id="address" name="address" type="text" placeholder="1 N State St" value="" /><span class="add-on">Chicago, IL</span><span id="help-address" rel="tooltip" title="Within 1/2 mile">&nbsp;&nbsp;?</span>
+							</div>
+							<button id="map-refresh" type="button" class="btn btn-primary"><i class="icon-refresh icon-white"></i>Run Query</button>
+							</div>
+							<div id="yearWarn"></div>
+							<div id="numResults">&nbsp;</div>
+							<button id="map-all" type="button" class="btn btn-danger"><i class="icon-map-marker icon-white"></i>Show All</button>
 						</form>
+						<p><em>* data last updated: February 24, 2012</em></p>
 					</div>
 					<div class="span8">
 						<div id="theMap" style="width:640px; height:640px;"></div>
