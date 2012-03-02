@@ -8,10 +8,12 @@ $(document).ready(function() {
 		var geoColumn = 'Location';
 		var fusionLayer = null;
 		var queryString = null;
+		var countQueryString = null;
 		var insertAnd = '';
 		var geocoder = new google.maps.Geocoder();
 		var searchRadius = '805';
 		var addrMarker = false;
+		var isCompletedRequest = false;
 		var myOptions = {
 			zoom : 11,
 			mapTypeControl : true,
@@ -30,6 +32,7 @@ $(document).ready(function() {
 		theMap.setCenter(CenterLatLng);
 		// Add the Tree Trim Data Layer.
 		function setQueryString() {
+			isCompletedRequest = false;
 			queryString = "SELECT " + geoColumn + " FROM " + fusionTableId;
 		}
 		setQueryString();
@@ -37,8 +40,7 @@ $(document).ready(function() {
 			query : queryString
 		});
 		fusionLayer.setMap(theMap);
-		displayCount(queryString);
-		displayStatistics(queryString);
+		displayCount(queryString,false);
 		// Tree Trim Data Listeners
 		$("#map-refresh").click(function() {
 			yearCreation = $("#year-creation").val();
@@ -57,6 +59,7 @@ $(document).ready(function() {
 				}
 					if (yearCompleted != 'open' && yearCompleted != 'all')
 					{
+						isCompletedRequest = true;
 						queryString = queryString + insertAnd + " CompletionDate >= '01/01/" + yearCompleted + "' AND CompletionDate <= '12/31/"+yearCompleted+"'";
 					}
 					if (yearCompleted == 'open')
@@ -65,11 +68,13 @@ $(document).ready(function() {
 					}
 					if (yearCompleted == 'all')
 					{
+						isCompletedRequest = true;
 						queryString = queryString + insertAnd + " Status LIKE '%Completed%'";
 					}
 				}
 				else
 				{
+					isCompletedRequest = true;
 					queryString = queryString + " WHERE Status LIKE '%Completed%'";
 				}
 				if (address != '')
@@ -130,7 +135,6 @@ $(document).ready(function() {
 					});
 			fusionLayer.setMap(theMap);
 			displayCount(queryString);
-			displayStatistics(queryString);
 		}
 		// Ward Layer Listeners
 		var wardLayer = new google.maps.FusionTablesLayer(3057562, {
@@ -153,9 +157,13 @@ $(document).ready(function() {
 				$("#numResults").html('<div class="alert"><strong>Calculating...</strong></div>');
 			});
 			$("#numResults").fadeIn();
-			queryString = queryString.replace("SELECT " + geoColumn,
+			countQueryString = queryString.replace("SELECT " + geoColumn,
 					"SELECT Count() ");
-			getFTQuery(queryString).send(displaySearchCount);
+			getFTQuery(countQueryString).send(displaySearchCount);
+			if(isCompletedRequest)
+			{
+				displayStatistics(queryString);
+			}
 		}
 		function getFTQuery(sql) {
 			var queryText = encodeURIComponent(sql);
@@ -190,6 +198,14 @@ $(document).ready(function() {
 		 */
 		function displayStatistics(queryString)
 		{
+			alert('I want to run stats.');
+			countQueryString = queryString.replace("SELECT " + geoColumn,
+			"SELECT CreationDate, CompletionDate, ");
+			getFTQuery(countQueryString).send(processStatistics);
+		}
+		function processStatistics(response)
+		{
+			numRows = parseInt(response.getDataTable().getValue(0, 0));
 			
 		}
 });
