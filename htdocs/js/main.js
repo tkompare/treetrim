@@ -14,6 +14,14 @@ $(document).ready(function() {
 		var searchRadius = '805';
 		var addrMarker = false;
 		var isCompletedRequest = false;
+		var isAddressRequest = false;
+		var createDates = new Array();
+		var completeDates = new Array();
+		var dateDiffs = new Array();
+		var total = new Array();
+		var flot = new Array();
+		var i = null; // iterator
+		var statResults = {};
 		var myOptions = {
 			zoom : 11,
 			mapTypeControl : true,
@@ -79,6 +87,7 @@ $(document).ready(function() {
 				}
 				if (address != '')
 				{
+					isAddressRequest = true; 
 					address += ' Chicago IL';
 					geocoder.geocode({'address': address}, function(results, status)
 					{
@@ -160,7 +169,7 @@ $(document).ready(function() {
 			countQueryString = queryString.replace("SELECT " + geoColumn,
 					"SELECT Count() ");
 			getFTQuery(countQueryString).send(displaySearchCount);
-			if(isCompletedRequest)
+			if(isCompletedRequest && isAddressRequest)
 			{
 				displayStatistics(queryString);
 			}
@@ -177,6 +186,7 @@ $(document).ready(function() {
 				numRows = parseInt(response.getDataTable().getValue(0, 0));
 			}
 			$("#numResults").fadeOut(function() {
+				$('#statsResults').fadeOut();
 				$("#numResults").html('<div class="alert alert-success"><strong>' + addCommas(numRows) + '</strong> Requests Selected</div>');
 			});
 			$("#numResults").fadeIn();
@@ -188,7 +198,8 @@ $(document).ready(function() {
 			x1 = x[0];
 			x2 = x.length > 1 ? '.' + x[1] : '';
 			var regx = /(\d+)(\d{3})/;
-			while (regx.test(x1)) {
+			while (regx.test(x1))
+			{
 				x1 = x1.replace(regx, '$1' + ',' + '$2');
 			}
 			return x1 + x2;
@@ -198,14 +209,47 @@ $(document).ready(function() {
 		 */
 		function displayStatistics(queryString)
 		{
-			alert('I want to run stats.');
-			countQueryString = queryString.replace("SELECT " + geoColumn,
-			"SELECT CreationDate, CompletionDate, ");
-			getFTQuery(countQueryString).send(processStatistics);
+			statQueryString = queryString.replace("SELECT " + geoColumn,
+			"SELECT CreationDate, CompletionDate");
+			//alert(statQueryString);
+			getFTQuery(statQueryString).send(processStatistics);
 		}
 		function processStatistics(response)
 		{
-			numRows = parseInt(response.getDataTable().getValue(0, 0));
-			
+			numRows = parseInt(response.getDataTable().getNumberOfRows());
+			for(i=1;i<=6;i++)
+			{
+				total[i] = 0;
+			}
+
+			for (i=0;i<numRows;i++)
+			{
+				createDates[i] = new XDate(response.getDataTable().getValue(i,0));
+				completeDates[i] = new XDate(response.getDataTable().getValue(i,1));
+				dateDiffs[i] = createDates[i].diffDays(completeDates[i]);
+				if(dateDiffs[i] < 100) { total[1]++; }
+				else if(dateDiffs[i] < 200) { total[2]++; }
+				else if(dateDiffs[i] < 300) { total[3]++; }
+				else if(dateDiffs[i] < 400) { total[4]++; }
+				else if(dateDiffs[i] < 500) { total[5]++; }
+				else { total[6]++; }
+			}
+			statResults.min = jStat.min(dateDiffs);
+			statResults.max = jStat.max(dateDiffs);
+			statResults.mean = jStat.mean(dateDiffs);
+			statResults.median = jStat.median(dateDiffs);
+			statResults.stdev = jStat.stdev(dateDiffs);
+			for(i=1;i<=6;i++)
+			{
+				flot[i] = [i,total[i]];
+			}
+			$("#statResults").fadeOut(function() {
+				$("#statResults").html('<div class="alert alert-info"><strong>' + statResults.min + '</strong> minimum days to complete<br/><strong>' + statResults.max + '</strong> maximum days to complete<br/><strong>' + statResults.mean + '</strong> average days to complete<br/><strong>' + statResults.median + '</strong> median days to complete<br/><strong>' + statResults.stdev + '</strong> standard deviation days to complete<div id="flot" style="width:100px;height:100px"></div><p>&nbsp;</p></div>');
+				$.plot($("#flot"), [{
+					data: flot,
+					bars: { show: true }
+				}]);
+			});
+			$("#statResults").fadeIn();
 		}
 });
