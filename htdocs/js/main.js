@@ -38,6 +38,7 @@ $(document).ready(function() {
 		});
 		fusionLayer.setMap(theMap);
 		displayCount(queryString);
+		displayStatistics(queryString);
 		// Tree Trim Data Listeners
 		$("#map-refresh").click(function() {
 			yearCreation = $("#year-creation").val();
@@ -129,6 +130,7 @@ $(document).ready(function() {
 					});
 			fusionLayer.setMap(theMap);
 			displayCount(queryString);
+			displayStatistics(queryString);
 		}
 		// Ward Layer Listeners
 		var wardLayer = new google.maps.FusionTablesLayer(3057562, {
@@ -143,13 +145,9 @@ $(document).ready(function() {
 				wardLayer.setMap(null);
 			}
 		});
-		// Getting Tree Trim Count
-		function getFTQuery(sql) {
-			var queryText = encodeURIComponent(sql);
-			return new google.visualization.Query(
-					'http://www.google.com/fusiontables/gvizdata?tq='
-							+ queryText);
-		}
+		/*
+		 * Getting Tree Trim Count
+		 */
 		function displayCount(queryString) {
 			$("#numResults").fadeOut(function() {
 				$("#numResults").html('<div class="alert"><strong>Calculating...</strong></div>');
@@ -157,8 +155,23 @@ $(document).ready(function() {
 			$("#numResults").fadeIn();
 			queryString = queryString.replace("SELECT " + geoColumn,
 					"SELECT Count() ");
-			// set the callback function
 			getFTQuery(queryString).send(displaySearchCount);
+		}
+		function getFTQuery(sql) {
+			var queryText = encodeURIComponent(sql);
+			return new google.visualization.Query(
+					'http://www.google.com/fusiontables/gvizdata?tq='
+							+ queryText);
+		}
+		function displaySearchCount(response) {
+			var numRows = 0;
+			if (response.getDataTable().getNumberOfRows() > 0) {
+				numRows = parseInt(response.getDataTable().getValue(0, 0));
+			}
+			$("#numResults").fadeOut(function() {
+				$("#numResults").html('<div class="alert alert-success"><strong>' + addCommas(numRows) + '</strong> Requests Selected</div>');
+			});
+			$("#numResults").fadeIn();
 		}
 		// Add in commas into numbers
 		function addCommas(nStr) {
@@ -172,14 +185,11 @@ $(document).ready(function() {
 			}
 			return x1 + x2;
 		}
-		function displaySearchCount(response) {
-			var numRows = 0;
-			if (response.getDataTable().getNumberOfRows() > 0) {
-				numRows = parseInt(response.getDataTable().getValue(0, 0));
-			}
-			$("#numResults").fadeOut(function() {
-				$("#numResults").html('<div class="alert alert-success"><strong>' + addCommas(numRows) + '</strong> Requests Selected</div>');
-			});
-			$("#numResults").fadeIn();
+		/*
+		 * Do some statistics on results
+		 */
+		function displayStatistics(queryString)
+		{
+			
 		}
 });
