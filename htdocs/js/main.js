@@ -13,13 +13,14 @@ $(document).ready(function() {
 		var geocoder = new google.maps.Geocoder();
 		var searchRadius = '805';
 		var addrMarker = false;
-		var isCompletedRequest = false;
+		var isStatsRequest = false;
 		var isAddressRequest = false;
 		var createDates = new Array();
 		var completeDates = new Array();
 		var dateDiffs = new Array();
 		var total = new Array();
 		var flot = new Array();
+		var openComplete = null;
 		var i = null; // iterator
 		var statResults = {};
 		var myOptions = {
@@ -40,7 +41,7 @@ $(document).ready(function() {
 		theMap.setCenter(CenterLatLng);
 		// Add the Tree Trim Data Layer.
 		function setQueryString() {
-			isCompletedRequest = false;
+			isStatsRequest = false;
 			queryString = "SELECT " + geoColumn + " FROM " + fusionTableId;
 		}
 		setQueryString();
@@ -67,22 +68,23 @@ $(document).ready(function() {
 				}
 					if (yearCompleted != 'open' && yearCompleted != 'all')
 					{
-						isCompletedRequest = true;
+						isStatsRequest = true;
 						queryString = queryString + insertAnd + " CompletionDate >= '01/01/" + yearCompleted + "' AND CompletionDate <= '12/31/"+yearCompleted+"'";
 					}
 					if (yearCompleted == 'open')
 					{
+						isStatsRequest = true;
 						queryString = queryString + insertAnd + " Status LIKE '%Open%'";
 					}
 					if (yearCompleted == 'all')
 					{
-						isCompletedRequest = true;
+						isStatsRequest = true;
 						queryString = queryString + insertAnd + " Status LIKE '%Completed%'";
 					}
 				}
 				else
 				{
-					isCompletedRequest = true;
+					isStatsRequest = true;
 					queryString = queryString + " WHERE Status LIKE '%Completed%'";
 				}
 				if (address != '')
@@ -116,6 +118,8 @@ $(document).ready(function() {
 				}
 				else
 				{
+					isAddressRequest = false;
+					$("#statResults").fadeOut(function() { $("#statResults").html('');});
 					resetMap(queryString);
 				}
 			}
@@ -129,11 +133,12 @@ $(document).ready(function() {
 			if(addrMarker != false)
 			{
 				addrMarker.setMap(null);
-		  }
+			}
 			resetMap(queryString);
 			$("#year-creation").val('none');
 			$("#year-completed").val('none');
 			$("#address").val('');
+			$("#statResults").fadeOut(function() { $("#statResults").html('');});
 		});
 		function resetMap(queryString)
 		{
@@ -169,7 +174,7 @@ $(document).ready(function() {
 			countQueryString = queryString.replace("SELECT " + geoColumn,
 					"SELECT Count() ");
 			getFTQuery(countQueryString).send(displaySearchCount);
-			if(isCompletedRequest && isAddressRequest)
+			if(isStatsRequest && isAddressRequest)
 			{
 				displayStatistics(queryString);
 			}
@@ -226,6 +231,12 @@ $(document).ready(function() {
 			{
 				createDates[i] = new XDate(response.getDataTable().getValue(i,0));
 				completeDates[i] = new XDate(response.getDataTable().getValue(i,1));
+				openComplete = 'DAYS TO COMPLETE REQUESTS';
+				if (completeDates[i] == '21600000')
+				{
+					openComplete = 'DAYS SINCE REQUESTS OPENED';
+					completeDates[i] = new XDate();
+				}
 				dateDiffs[i] = createDates[i].diffDays(completeDates[i]);
 				if(dateDiffs[i] < 100) { total[1]++; }
 				else if(dateDiffs[i] < 200) { total[2]++; }
@@ -244,12 +255,20 @@ $(document).ready(function() {
 				flot[i] = [i,total[i]];
 			}
 			$("#statResults").fadeOut(function() {
-				$("#statResults").html('<div class="alert alert-info"><strong>' + statResults.min + '</strong> minimum days to complete<br/><strong>' + statResults.max + '</strong> maximum days to complete<br/><strong>' + statResults.mean + '</strong> average days to complete<br/><strong>' + statResults.median + '</strong> median days to complete<br/><strong>' + statResults.stdev + '</strong> standard deviation days to complete<div id="flot" style="width:100px;height:100px"></div><p>&nbsp;</p></div>');
-				$.plot($("#flot"), [{
-					data: flot,
-					bars: { show: true }
-				}]);
+				$("#statResults").html('<div class="alert alert-info"><strong>' + openComplete + '<br/>' + roundNum(statResults.min,0) + '</strong> minimum<br/><strong>' + roundNum(statResults.max,0) + '</strong> maximum<br/><strong>' + roundNum(statResults.mean,1) + '</strong> average<br/><strong>' + roundNum(statResults.median,1) + '</strong> median<br/><strong>' + roundNum(statResults.stdev,1) + '</strong> standard deviation<div id="flot" style="width:240px;height:100px"></div><p>&nbsp;</p></div>');
+				$.plot($("#flot"), [{ data: flot}],
+							{
+								bars: { show: true },
+								xaxis: {
+									ticks: [[1,"0"],[2,"100"],[3,"200"],[4,"300"],[5,"400"],[6,"500"],[7,"&#x221E;"]]
+								}
+							}
+				);
 			});
 			$("#statResults").fadeIn();
+		}
+		function roundNum(num, dec) {
+			var result = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
+			return result;
 		}
 });
