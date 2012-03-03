@@ -255,7 +255,7 @@ $(document).ready(function() {
 				flot[i] = [i,total[i]];
 			}
 			$("#statResults").fadeOut(function() {
-				$("#statResults").html('<div class="alert alert-info"><strong>' + openComplete + '<br/>' + roundNum(statResults.min,0) + '</strong> minimum<br/><strong>' + roundNum(statResults.max,0) + '</strong> maximum<br/><strong>' + roundNum(statResults.mean,1) + '</strong> average<br/><strong>' + roundNum(statResults.median,1) + '</strong> median<br/><strong>' + roundNum(statResults.stdev,1) + '</strong> standard deviation<div id="flot" style="width:240px;height:100px"></div><p>&nbsp;</p></div>');
+				$("#statResults").html('<div class="alert alert-info"><strong>' + openComplete + '<br/>' + roundNum(statResults.min,0) + '</strong> minimum<br/><strong>' + roundNum(statResults.max,0) + '</strong> maximum<br/><strong>' + roundNum(statResults.mean,1) + '</strong> average<br/><strong>' + roundNum(statResults.median,1) + '</strong> median<br/><strong>' + roundNum(statResults.stdev,1) + '</strong> standard deviation<div id="flot" style="width:240px;height:100px"></div><p>&nbsp;<br/>requests - vertical&nbsp;&nbsp;|&nbsp;&nbsp;days - horizonal</p></div>');
 				$.plot($("#flot"), [{ data: flot}],
 							{
 								bars: { show: true },
