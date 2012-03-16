@@ -315,10 +315,10 @@ $(document).ready(function() {
 				ctt.flot[ctt.i] = [ctt.i,ctt.total[ctt.i]];
 			}
 			$("#statResults").fadeOut(function() {
-				$("#statResults").html('<div class="alert alert-info"><strong>' + ctt.openComplete + '<br/>' + roundNum(ctt.statResults.min,0) + '</strong> minimum<br/><strong>' + roundNum(ctt.statResults.max,0) + '</strong> maximum<br/><strong>' + roundNum(ctt.statResults.mean,1) + '</strong> average<br/><strong>' + roundNum(ctt.statResults.median,1) + '</strong> median<br/><strong>' + roundNum(ctt.statResults.stdev,1) + '</strong> standard deviation<div id="flot" style="width:240px;height:100px"></div><p>&nbsp;<br/>requests - vertical&nbsp;&nbsp;|&nbsp;&nbsp;days - horizonal</p></div>');
-				$.plot($("#flot"), [{ data: ctt.flot}],
+				$("#statResults").html('<div class="alert alert-info"><strong>' + ctt.openComplete + '<br/>' + roundNum(ctt.statResults.min,0) + '</strong> minimum<br/><strong>' + roundNum(ctt.statResults.max,0) + '</strong> maximum<br/><strong>' + roundNum(ctt.statResults.mean,0) + '</strong> average<br/><strong>' + roundNum(ctt.statResults.median,0) + '</strong> median<br/><strong>' + roundNum(ctt.statResults.stdev,0) + '</strong> standard deviation<div id="flot" style="width:240px;height:100px"></div><p>&nbsp;<br/>requests - vertical&nbsp;&nbsp;|&nbsp;&nbsp;days - horizonal</p></div>');
+				$.plot($("#flot"), [{ color:"rgba(255,50,50,0.66)", data:ctt.flot}],
 							{
-								bars: { show: true },
+								bars: { show: true, fillColor:"rgba(255,50,50,0.25)" },
 								xaxis: {
 									ticks: [[1,"0"],[2,"100"],[3,"200"],[4,"300"],[5,"400"],[6,"500"],[7,"&#x221E;"]]
 								}
