@@ -8,6 +8,7 @@ $(document).ready(function() {
 		* Set up various variables
 		*/
 		var ctt = {}; // The local master object: ctt: (C)hicago (T)ree (T)rim
+		ctt.updateDate = '2012-03-18';
 		ctt.mapDOM = document.getElementById('theMap'); // the DOM object (div) in which to place the Google Map.
 		ctt.CenterLatLng = new google.maps.LatLng('41.845', '-87.669'); //initial center of the map
 		ctt.treetrimLayer = null; // the tree trim data map layer
@@ -295,7 +296,7 @@ $(document).ready(function() {
 				if (ctt.completeDates[ctt.i] == '21600000')
 				{
 					ctt.openComplete = 'DAYS SINCE REQUESTS OPENED';
-					ctt.completeDates[ctt.i] = new XDate();
+					ctt.completeDates[ctt.i] = new XDate(ctt.updateDate);
 				}
 				ctt.dateDiffs[ctt.i] = ctt.createDates[ctt.i].diffDays(ctt.completeDates[ctt.i]);
 				if(ctt.dateDiffs[ctt.i] < 100) { ctt.total[1]++; }
