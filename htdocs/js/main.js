@@ -8,7 +8,7 @@ $(document).ready(function() {
 		* Set up various variables
 		*/
 		var ctt = {}; // The local master object: ctt: (C)hicago (T)ree (T)rim
-		ctt.updateDate = '2012-03-18';
+		ctt.updateDate = '2012-03-18'; // The date of last update
 		ctt.mapDOM = document.getElementById('theMap'); // the DOM object (div) in which to place the Google Map.
 		ctt.CenterLatLng = new google.maps.LatLng('41.845', '-87.669'); //initial center of the map
 		ctt.treetrimLayer = null; // the tree trim data map layer
